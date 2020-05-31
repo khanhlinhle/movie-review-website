@@ -2,64 +2,182 @@ import React, { Component } from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'mdbreact/dist/css/mdb.css';
-import {
-  Container, Nav, Navbar, Form, FormControl, Button, Carousel,
-  Row, Col, ListGroup, ListGroupItem
-} from "react-bootstrap";
+import { Nav, Navbar, Form, FormControl, Button } from "react-bootstrap";
 import { MDBAnimation } from "mdbreact";
 
-import MovieCards from './components/MovieCards';
+import MovieList from './components/MovieList';
 import MovieInfo from './components/MovieInfo'
 
 const APIKEY = process.env.REACT_APP_APIKEY;
+const ERR_MSG = "Something wrong! Please try again later!";
 
 export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       isReady: false,
+      genres: [],
       arrMovie: [],
+      originArrMovie: [],
+      selectedMovie: "",
     }
   }
 
   componentDidMount = () => {
-    this.getMovies();
+    this.getGenreList();
   }
 
-  //   `https://api.themoviedb.org/3/movie/${idvalue}/videos?api_key=${api}&language=en-US`
+  // trailer API
+  // `https://api.themoviedb.org/3/movie/${idvalue}/videos?api_key=${api}&language=en-US`
 
-  getMovies = async (pageNo) => {
+  getMovies = async (url) => {
+    try {
+      let respone = await fetch(url);
+      if (!respone.ok) throw ERR_MSG;
 
-    let url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${APIKEY}&language=en-US&page=${pageNo}`
+      let data = await respone.json();
+      let movies = data.results.map((item) => {
+        return {
+          title: item.title,
+          poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
+          description: item.overview,
+          date: item.release_date,
+          rating: item.vote_average,
+          ratingCount: item.vote_count,
+          popularity: item.popularity,
+          genres: item.genre_ids.map(movieGenreId => {
+            let genre = this.state.genres.find(g => g.id === movieGenreId);
+            return genre.name;
+          })
+        }
+      });
+      // console.log(data.results[0]);
+      // console.log(movies[0]);
+      // console.log(this.state.genres);
 
-    let respone = await fetch(url);
-    let data = await respone.json();
-    let movies = data.results.map((item) => {
-      return {
-        title: item.title,
-        poster: `https://image.tmdb.org/t/p/w300_and_h450_bestv2${item.poster_path}`,
-        description: item.overview,
-        date: item.release_date,
-        rating: item.vote_average,
-        genre: item.genre_ids,
-      }
-    });
+      this.setState({
+        isReady: true,
+        genres: this.state.genres,
+        arrMovie: movies,
+        originArrMovie: movies,
+        selectedMovie: this.state.selectedMovie,
+      });
+    } catch (error) {
+      alert(error);
+    }
+  }
 
-    console.log(data.results[0]);
+  getGenreList = async () => {
+    try {
+
+      let genreUrl = `https://api.themoviedb.org/3/genre/movie/list?api_key=${APIKEY}&language=en-US`
+      let respone = await fetch(genreUrl);
+      if (!respone.ok) throw ERR_MSG;
+
+      let data = await respone.json();
+      this.setState({
+        isReady: this.state.isReady,
+        genres: data.genres,
+        arrMovie: this.state.arrMovie,
+        originArrMovie: this.state.originArrMovie,
+        selectedMovie: this.state.selectedMovie,
+      });
+
+      let movieUrl = `https://api.themoviedb.org/3/movie/now_playing?api_key=${APIKEY}&language=en-US`
+      this.getMovies(movieUrl);
+
+    } catch (error) {
+      alert(error);
+    }
+  }
+
+  setSelectedMovie = (movieTitle) => {
     this.setState({
-      isReady: true,
-      arrMovie: movies
+      isReady: this.state.isReady,
+      genres: this.state.genres,
+      arrMovie: this.state.arrMovie,
+      originArrMovie: this.state.originArrMovie,
+      selectedMovie: movieTitle,
     });
-
-
   }
 
-  // getGenreList = async () => {
-  //   let url = `https://api.themoviedb.org/3/genre/movie/list?api_key=${APIKEY}&language=en-US`
-  //   let respone = await fetch(url);
-  //   let data = await respone.json();
-  //   this.getMovies();
-  // }
+  searchContents = "";
+  filterMovie = () => {
+    let filteredMovies = this.state.originArrMovie;
+    let selectedName = "";
+
+    if (this.searchContents.length > 0) {
+      filteredMovies = filteredMovies.filter(
+        m => m.title.toLowerCase().includes(this.searchContents.toLowerCase()));
+
+      if (filteredMovies.length > 0) {
+        selectedName = filteredMovies[0].title;
+      }
+    }
+
+    this.setState({
+      isReady: this.state.isReady,
+      genres: this.state.genres,
+      arrMovie: filteredMovies,
+      originArrMovie: this.state.originArrMovie,
+      selectedMovie: selectedName,
+    });
+  }
+
+  currentAPIPage = 1;
+  getMovieAtPage = (pageNo) => {
+    this.currentAPIPage = pageNo;
+    let movieUrl = `https://api.themoviedb.org/3/movie/now_playing?api_key=${APIKEY}&language=en-US&page=${pageNo}`
+    this.getMovies(movieUrl);
+  }
+
+  getMovieAtNextPrev = (str) => {
+    if (str === "+") {
+      this.currentAPIPage++;
+    } else if (str === "-") {
+      this.currentAPIPage--;
+    }
+
+    let movieUrl = `https://api.themoviedb.org/3/movie/now_playing?api_key=${APIKEY}&language=en-US&page=${this.currentAPIPage}`
+    this.getMovies(movieUrl);
+  }
+
+getListName = () => {
+  // let listMovieUrl = `https://api.themoviedb.org/3/movie/${}?api_key=${APIKEY}&language=en-US&page=${pageNo}`
+  // this.getMovies(movieUrl);
+}
+
+  ratingUp = true;
+  popularityUp = true;
+  sortMovie = (type) => {
+    let filteredMovies = this.state.arrMovie;
+
+    if (type === "rating") {
+      this.ratingUp = !this.ratingUp;
+      filteredMovies = filteredMovies.sort((a, b) => {
+        if (this.ratingUp) 
+          return a.rating > b.rating ? 1 : -1;
+        else 
+          return a.rating > b.rating ? -1 : 1;
+      });
+    } else if (type === "popularity") {
+      this.popularityUp = !this.popularityUp;
+      filteredMovies = filteredMovies.sort((a, b) => {
+        if (this.popularityUp) 
+          return a.popularity > b.popularity ? 1 : -1;
+        else 
+          return a.popularity > b.popularity ? -1 : 1;
+      });
+    }
+
+    this.setState({
+      isReady: this.state.isReady,
+      genres: this.state.genres,
+      arrMovie: filteredMovies,
+      originArrMovie: this.state.originArrMovie,
+      selectedMovie: this.state.selectedMovie,
+    });
+  }
 
   render() {
     let isReady = this.state.isReady;
@@ -68,18 +186,16 @@ export default class App extends Component {
       return (<h1>Loading</h1>);
     }
 
-    let movies = this.state.arrMovie;
-
     return (
-      <div>
-        <Navbar bg="dark" variant="dark">
+      <div className="my-color-primary">
+        <Navbar variant="dark" className="my-color-primary">
           <Navbar.Brand href="#home">
             <MDBAnimation type="bounce" infinite>
               <img className="img-fluid nav-img" alt="" src="https://pbs.twimg.com/profile_images/1148484652358746112/UdJALHjZ_400x400.png" />
             </MDBAnimation>
           </Navbar.Brand>
           <Nav className="mr-auto">
-            <Nav.Link href="#home">Home</Nav.Link>
+            <Nav.Link href="#home" onClick="">Home</Nav.Link>
             <Nav.Link href="#category">Category</Nav.Link>
             <Nav.Link href="#category">Latest</Nav.Link>
             <Nav.Link href="#popular">Popular</Nav.Link>
@@ -87,47 +203,69 @@ export default class App extends Component {
             <Nav.Link href="#upcoming">Upcoming</Nav.Link>
           </Nav>
           <Form inline>
-            <FormControl type="text" placeholder="Search" className="mr-sm-2" />
-            <Button variant="outline-info">Search</Button>
+            <FormControl
+              onChange={e => { this.searchContents = e.target.value; }}
+              type="text" placeholder="Search" className="mr-sm-2" />
+            <Button variant="outline-info" onClick={() => this.filterMovie()}>Search</Button>
           </Form>
         </Navbar>
 
-        <MovieInfo movie={this.state.arrMovie[0]}></MovieInfo>
+        <div className="react-body my-color-secondary">
+          <MovieInfo selectedMovie={this.state.selectedMovie} movies={this.state.arrMovie}></MovieInfo>
 
-        <Carousel>
-          {movies.map((item, i) => {
-            return (
-              <Carousel.Item key={i}>
-                <Container>
-                  <Row>
-                    <Col md={{ span: 4, offset: 2 }}>
-                      <img src={item.poster}></img>
-                    </Col>
-                    <Col md={{ span: 4 }}>
-                      Release date: {item.date}
-                      Rating: {item.rating}
+          <div className="page-button-part">
+            <div>
+              <Button variant="info" className="page-button" onClick={() => this.sortMovie("rating")}>
+                Rating 
+                {
+                  this.ratingUp ?
+                    <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                    :
+                    <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                }
+              </Button>
+              <Button variant="info" className="page-button" onClick={() => this.sortMovie("popularity")}>
+                Popularity 
+                {
+                  this.popularityUp ?
+                    <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                    :
+                    <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                }
+              </Button>
+            </div>
+            <div>
+              {
+                this.currentAPIPage > 1 ?
+                  <Button className="page-button" onClick={() => this.getMovieAtNextPrev("-")}>
+                    Prev
+                </Button>
+                  :
+                  <Button className="page-button" disabled={true}>Prev</Button>
+              }
+              <Button className="page-button" onClick={() => this.getMovieAtPage(1)}>1</Button>
+              <Button className="page-button" onClick={() => this.getMovieAtPage(2)}>2</Button>
+              <Button className="page-button" onClick={() => this.getMovieAtPage(3)}>3</Button>
+              <Button className="page-button" onClick={() => this.getMovieAtPage(4)}>4</Button>
+              <Button className="page-button" onClick={() => this.getMovieAtPage(5)}>5</Button>
+              {
+                this.currentAPIPage < 5 ?
+                  <Button className="page-button" onClick={() => this.getMovieAtNextPrev("+")}>
+                    Next
+                </Button>
+                  :
+                  <Button className="page-button" disabled={true}>Next</Button>
+              }
+            </div>
+          </div>
 
-                    </Col>
-                  </Row>
-                </Container>
-              </Carousel.Item>
-            )
-          })}
-        </Carousel>
-
-        {/* <MovieCards movieList={this.state.arrMovie}></MovieCards> */}
-
-        <div className="button-part">
-          <Button className="page-button" onClick={() => this.getMovies(1)}>1</Button>
-          <Button className="page-button" onClick={() => this.getMovies(2)}>2</Button>
-          <Button className="page-button" onClick={() => this.getMovies(3)}>3</Button>
-          <Button className="page-button" onClick={() => this.getMovies(4)}>4</Button>
-          <Button className="page-button" onClick={() => this.getMovies(5)}>5</Button>
+          <MovieList onSelectMovie={this.setSelectedMovie} movieList={this.state.arrMovie.filter((m, i) => i < 10)}></MovieList>
+          <MovieList onSelectMovie={this.setSelectedMovie} movieList={this.state.arrMovie.filter((m, i) => i > 9)}></MovieList>
         </div>
 
-        <footer className="page-footer font-small black">
+        <footer className="page-footer font-small my-color-primary">
           <div className="footer-copyright text-center py-3">© 2020 Copyright:
-            <a href="https://mdbootstrap.com/"> MDBootstrap.com</a>
+            <a href="https://github.com/khanhlinhle/"> khanhlinhle</a>
           </div>
         </footer>
       </div>

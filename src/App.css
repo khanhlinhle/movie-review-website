@@ -1,26 +1,91 @@
+body > #root > div {
+  height: 100vh;
+}
+
+.my-color-primary {
+  background-color: #323259;
+}
+
+.my-color-secondary {
+  background-color: #1b1b38;
+}
+
+.react-body {
+  min-height: 85%;
+}
+
 .nav-img {
   width: 50px;
 }
 
-.movie-list {
-  margin: 50px;
+.movie-info-page {
+  text-align: center;
+  color: white;
+}
+
+.movie-carousel {
+  height: 100%;
+}
+
+.movie-container {
+  width: 100%;
+  height: 100%;
+  margin: 5px 5px;
+  padding: 15px;
+  display: flex;
+  justify-content: center;
 }
 
 .movie-card {
-  min-width: 300px !important;
-  height: auto;
+  border-radius: 20px;
+  background-color: transparent;
 }
 
-.img-nav {
-  height: 750px;
+.movie-poster {
+  width: 500px;
 }
 
-.button-part {
-  display: flex;
+.movie-info {
+  width: 500px;
+  margin: 0 15px;
+}
+
+.movie-title {
+  color: greenyellow;
+  text-align: center;
+}
+
+.movie-genre {
+  margin-right: 5px;
+}
+
+.movie-description {
+  color: white !important;
+  padding-right: 5px;
+}
+
+.movie-list {
   justify-content: center;
+}
+
+.movie-list-item {
+  float: left;
+}
+
+.movie-list-item-img {
+  width: 100%;
+}
+
+.page-button-part {
+  display: flex;
+  justify-content: space-between;
 }
 
 .page-button {
   margin-right: 5px;
   margin-bottom: 20px;
+}
+
+.checked {
+  color: orange;
 }
