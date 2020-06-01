@@ -21,7 +21,6 @@ export default class TrailerShow extends Component {
       openModal: false
     })
   }
-  
 
   openModal = () => {
     this.setState({
@@ -45,12 +44,13 @@ export default class TrailerShow extends Component {
       alert(error);
     }
   }
+
   render() {
     return (
       <div>
         <Button variant="primary" onClick={() => this.openModal()}>
           Trailer</Button>
-        <ReactModal isOpen={this.state.openModal}>
+        <ReactModal isOpen={this.state.openModal} appElement={document.getElementById('root')} className="modal-page">
         <Button onClick={() => this.closeModal()}>Close</Button>
         <div className="container-text">
           <YouTube className="youtube-part" video={this.state.videoId} autoplay/>
