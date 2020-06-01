@@ -4,7 +4,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'mdbreact/dist/css/mdb.css';
 import { Nav, Navbar, Form, FormControl, Button } from "react-bootstrap";
 import { MDBAnimation } from "mdbreact";
-
 import MovieList from './components/MovieList';
 import MovieInfo from './components/MovieInfo'
 
@@ -27,9 +26,6 @@ export default class App extends Component {
     this.getGenreList();
   }
 
-  // trailer API
-  // `https://api.themoviedb.org/3/movie/${idvalue}/videos?api_key=${api}&language=en-US`
-
   getMovies = async (url) => {
     try {
       let respone = await fetch(url);
@@ -38,6 +34,7 @@ export default class App extends Component {
       let data = await respone.json();
       let movies = data.results.map((item) => {
         return {
+          id: item.id,
           title: item.title,
           poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
           description: item.overview,
@@ -69,7 +66,6 @@ export default class App extends Component {
 
   getGenreList = async () => {
     try {
-
       let genreUrl = `https://api.themoviedb.org/3/genre/movie/list?api_key=${APIKEY}&language=en-US`
       let respone = await fetch(genreUrl);
       if (!respone.ok) throw ERR_MSG;
@@ -146,7 +142,7 @@ export default class App extends Component {
     let listMovieUrl = `https://api.themoviedb.org/3/movie/${listName}?api_key=${APIKEY}&language=en-US&page=1`
     this.getMovies(listMovieUrl);
   }
-  
+
 
   ratingUp = true;
   popularityUp = true;
@@ -220,18 +216,18 @@ export default class App extends Component {
                 Rating
                 {
                   this.ratingUp ?
-                    <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                    <i className="fa fa-arrow-up" aria-hidden="true"></i>
                     :
-                    <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                    <i className="fa fa-arrow-down" aria-hidden="true"></i>
                 }
               </Button>
               <Button variant="info" className="page-button" onClick={() => this.sortMovie("popularity")}>
                 Popularity
                 {
                   this.popularityUp ?
-                    <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                    <i className="fa fa-arrow-up" aria-hidden="true"></i>
                     :
-                    <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                    <i className="fa fa-arrow-down" aria-hidden="true"></i>
                 }
               </Button>
             </div>
@@ -259,6 +255,11 @@ export default class App extends Component {
               }
             </div>
           </div>
+
+          {/* <ReactModal isOpen={true} >
+            <button onClick={() => closeModal()}>close</button>
+            Hey this is modal!!
+          </ReactModal> */}
 
           <MovieList onSelectMovie={this.setSelectedMovie} movieList={this.state.arrMovie.filter((m, i) => i < 10)}></MovieList>
           <MovieList onSelectMovie={this.setSelectedMovie} movieList={this.state.arrMovie.filter((m, i) => i > 9)}></MovieList>

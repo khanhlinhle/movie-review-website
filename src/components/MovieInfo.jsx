@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Carousel, Row, Card, Badge, Table } from "react-bootstrap";
 
 import '../App.css';
+import TrailerShow from './TrailerShow';
 
 export default class MovieInfo extends Component {
   constructor(props) {
@@ -25,11 +26,12 @@ export default class MovieInfo extends Component {
     let blacks = 10 - yellows;
 
     for (let index = 0; index < yellows; index++) {
-      html.push(<span className="fa fa-star checked"></span>);
+      html.push(<span key={index} className="fa fa-star checked"></span>);
     }
+    let count = html.length;
 
     for (let index = 0; index < blacks; index++) {
-      html.push(<span className="fa fa-star"></span>);
+      html.push(<span key={index + count} className="fa fa-star"></span>);
     }
 
     return html;
@@ -88,6 +90,12 @@ export default class MovieInfo extends Component {
                           <tr>
                             <td>Release date:</td>
                             <td>{item.date}</td>
+                          </tr>
+                          <tr>
+                            <td>Trailer: </td>
+                            <td>
+                              <TrailerShow movie={item}></TrailerShow>
+                            </td>
                           </tr>
                           <tr>
                             <td colSpan="2">

@@ -89,3 +89,10 @@ body > #root > div {
 .checked {
   color: orange;
 }
+
+.container-text {
+  width: 100%;
+  background-color: lightgreen;
+  height: 100%;
+}
+
