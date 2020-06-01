@@ -142,10 +142,11 @@ export default class App extends Component {
     this.getMovies(movieUrl);
   }
 
-getListName = () => {
-  // let listMovieUrl = `https://api.themoviedb.org/3/movie/${}?api_key=${APIKEY}&language=en-US&page=${pageNo}`
-  // this.getMovies(movieUrl);
-}
+  getListName = (listName) => {
+    let listMovieUrl = `https://api.themoviedb.org/3/movie/${listName}?api_key=${APIKEY}&language=en-US&page=1`
+    this.getMovies(listMovieUrl);
+  }
+  
 
   ratingUp = true;
   popularityUp = true;
@@ -155,17 +156,17 @@ getListName = () => {
     if (type === "rating") {
       this.ratingUp = !this.ratingUp;
       filteredMovies = filteredMovies.sort((a, b) => {
-        if (this.ratingUp) 
+        if (this.ratingUp)
           return a.rating > b.rating ? 1 : -1;
-        else 
+        else
           return a.rating > b.rating ? -1 : 1;
       });
     } else if (type === "popularity") {
       this.popularityUp = !this.popularityUp;
       filteredMovies = filteredMovies.sort((a, b) => {
-        if (this.popularityUp) 
+        if (this.popularityUp)
           return a.popularity > b.popularity ? 1 : -1;
-        else 
+        else
           return a.popularity > b.popularity ? -1 : 1;
       });
     }
@@ -195,12 +196,12 @@ getListName = () => {
             </MDBAnimation>
           </Navbar.Brand>
           <Nav className="mr-auto">
-            <Nav.Link href="#home" onClick="">Home</Nav.Link>
+            <Nav.Link href="#home" onClick={() => this.getListName("now_playing")}>Home</Nav.Link>
             <Nav.Link href="#category">Category</Nav.Link>
-            <Nav.Link href="#category">Latest</Nav.Link>
-            <Nav.Link href="#popular">Popular</Nav.Link>
-            <Nav.Link href="#toprated">Top Rated</Nav.Link>
-            <Nav.Link href="#upcoming">Upcoming</Nav.Link>
+            <Nav.Link href="#category" onClick={() => this.getListName("latest")}>Latest</Nav.Link>
+            <Nav.Link href="#popular" onClick={() => this.getListName("popular")}>Popular</Nav.Link>
+            <Nav.Link href="#toprated" onClick={() => this.getListName("top_rated")}>Top Rated</Nav.Link>
+            <Nav.Link href="#upcoming" onClick={() => this.getListName("upcoming")}>Upcoming</Nav.Link>
           </Nav>
           <Form inline>
             <FormControl
@@ -216,7 +217,7 @@ getListName = () => {
           <div className="page-button-part">
             <div>
               <Button variant="info" className="page-button" onClick={() => this.sortMovie("rating")}>
-                Rating 
+                Rating
                 {
                   this.ratingUp ?
                     <i class="fa fa-arrow-up" aria-hidden="true"></i>
@@ -225,7 +226,7 @@ getListName = () => {
                 }
               </Button>
               <Button variant="info" className="page-button" onClick={() => this.sortMovie("popularity")}>
-                Popularity 
+                Popularity
                 {
                   this.popularityUp ?
                     <i class="fa fa-arrow-up" aria-hidden="true"></i>
