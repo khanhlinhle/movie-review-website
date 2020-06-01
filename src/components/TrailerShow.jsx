@@ -51,10 +51,10 @@ export default class TrailerShow extends Component {
         <Button variant="primary" onClick={() => this.openModal()}>
           Trailer</Button>
         <ReactModal isOpen={this.state.openModal}>
-        <div className="container-text">
-          <YouTube className="container-text" video={this.state.videoId} autoplay/>
-        </div>
         <Button onClick={() => this.closeModal()}>Close</Button>
+        <div className="container-text">
+          <YouTube className="youtube-part" video={this.state.videoId} autoplay/>
+        </div>
         </ReactModal>
       </div>
     )

@@ -92,7 +92,11 @@ body > #root > div {
 
 .container-text {
   width: 100%;
-  background-color: lightgreen;
+  height: 100%;
+}
+
+.youtube-part {
+  width: 100%;
   height: 100%;
 }
 
